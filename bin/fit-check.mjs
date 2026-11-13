@@ -5,6 +5,7 @@
 //   clipped      text cut off by its box or an ancestor with overflow hidden (no ellipsis, no line clamp)
 //   page-scroll  the page is wider than the viewport (sideways scroll)
 //   page-error   an uncaught JavaScript error while the page loaded (it can leave half a page drawn)
+// Each hit records its state ("as loaded" or "tab: <name>") and its fold (the <summary> path of the <details> around it, or null).
 // Writes <out>/report.md, <out>/report.json and a screenshot crop per hit in <out>/crops/. Exit 0 clean, 1 hits, 2 a page failed or no browser.
 // No secrets, no network beyond the URLs you give it.
 import fs from 'node:fs';
@@ -104,7 +105,7 @@ async function checkOne(browser, url, width) {
       }
     };
     await pass('as loaded');
-    const addErrors = (state) => { for (const e of errors.splice(0)) { const key = 'page-error|' + e; if (seen.has(key)) continue; seen.add(key); res.hits.push({ kind: 'page-error', selector: '(page)', text: e.slice(0, 160), detail: 'uncaught error', state, crop: null, rect: null }); } };
+    const addErrors = (state) => { for (const e of errors.splice(0)) { const key = 'page-error|' + e; if (seen.has(key)) continue; seen.add(key); res.hits.push({ kind: 'page-error', selector: '(page)', text: e.slice(0, 160), detail: 'uncaught error', state, fold: null, crop: null, rect: null }); } };
     addErrors('as loaded');
     if (reveal) {
       const tabs = await page.$$('[role="tab"]');
@@ -145,6 +146,8 @@ await browser.close();
 // ---------- report: grouped by page, then by hit (with the widths it shows at)
 const byUrl = new Map(urls.map((u) => [u, []]));
 for (const r of results) byUrl.get(r.url).push(r);
+// where a hit was seen, after the detail: the tab state (unless "as loaded") and the fold path (unless null)
+const where = (g) => { const p = [g.state && g.state !== 'as loaded' ? g.state : null, g.fold ? 'fold: ' + g.fold : null].filter(Boolean); return p.length ? ` (${p.join(' · ').replace(/\|/g, '\\|')})` : ''; };
 const KIND = { 'split-word': 'Word split mid-word', overflow: 'Text overflows its box', clipped: 'Text clipped', 'page-scroll': 'Sideways page scroll', 'page-error': 'Page error' };
 let total = 0, failed = 0; const json = [];
 const md = [`# fit-check report`, '', `Generated ${new Date().toISOString()} · widths ${widths.join(', ')} px · ${urls.length} URL(s)`, ''];
@@ -166,7 +169,7 @@ for (const [u, rs] of byUrl) {
   for (const [kind, label] of Object.entries(KIND)) {
     const gs = [...groups.values()].filter((g) => g.kind === kind); if (!gs.length) continue;
     md.push(`### ${label} (${gs.length})`, '', '| Widths | Element | Text | Detail | Crop |', '|---|---|---|---|---|');
-    for (const g of gs) md.push(`| ${g.widths.join(', ')} | \`${g.selector.replace(/\|/g, '\\|')}\` | ${String(g.text).replace(/\|/g, '\\|').slice(0, 80)} | ${g.detail.replace(/\|/g, '\\|')}${g.state && g.state !== 'as loaded' ? ` (${g.state})` : ''} | ${g.crops[0] ? `[crop](${g.crops[0]})` : ''} |`);
+    for (const g of gs) md.push(`| ${g.widths.join(', ')} | \`${g.selector.replace(/\|/g, '\\|')}\` | ${String(g.text).replace(/\|/g, '\\|').slice(0, 80)} | ${g.detail.replace(/\|/g, '\\|')}${where(g)} | ${g.crops[0] ? `[crop](${g.crops[0]})` : ''} |`);
     md.push('');
   }
   const skipped = Math.max(0, ...rs.map((r) => r.skippedLongTokens));

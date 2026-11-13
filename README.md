@@ -14,6 +14,17 @@ It writes `fit-report/report.md` (grouped by page, then by hit, with the widths 
 
 It opens every `<details>` and clicks through every visible `[role="tab"]`, so content in closed folds and other tabs is checked too. It needs no keys or secrets and talks only to the URLs you give it.
 
+## Report format
+
+Each hit in `report.json` has `kind`, `selector`, `text`, `detail`, `widths` and `crops`, plus where it was found:
+
+| Field | Meaning |
+|---|---|
+| `state` | `as loaded` (every `<details>` already opened, unless `--no-reveal`), or `tab: <tab text>` after clicking that tab. |
+| `fold` | The `<summary>` text of every `<details>` around the hit, outermost first, e.g. `Shipping > Returns`; `null` when it is in no fold. Text inside a `<summary>` does not count that summary's own fold, since it shows while the fold is shut. |
+
+`report.md` shows both after the detail when they say something: `(tab: Pricing · fold: Shipping > Returns)`. `as loaded` and a `null` fold are left out.
+
 ## What it leaves alone (on purpose)
 
 - Text with an **ellipsis** (`text-overflow: ellipsis`) or a **line clamp**.
@@ -36,8 +47,8 @@ npx playwright install chromium-headless-shell    # or set FIT_CHECK_CHROMIUM=/p
 Run it straight from GitHub. Pin a tag so a later change can't surprise you:
 
 ```sh
-npx --yes github:Beo-Halfhand/fit-check#v0.1.2 https://example.com/ https://example.com/about
-npx --yes github:Beo-Halfhand/fit-check#v0.1.2 --urls-file fit-urls.txt --out fit-report
+npx --yes github:Beo-Halfhand/fit-check#v0.1.3 https://example.com/ https://example.com/about
+npx --yes github:Beo-Halfhand/fit-check#v0.1.3 --urls-file fit-urls.txt --out fit-report
 ```
 
 Or from a clone:
@@ -45,7 +56,7 @@ Or from a clone:
 ```sh
 git clone https://github.com/Beo-Halfhand/fit-check && cd fit-check && npm install
 node bin/fit-check.mjs https://example.com/
-npm test        # checks itself against test/bad.html: exactly one of each bug, none of the intended cases
+npm test        # checks itself against test/bad.html (exactly one of each bug, none of the intended cases) and test/fold.html (fold paths)
 ```
 
 Options:
@@ -71,21 +82,21 @@ Options:
 # scripts/fit-check.sh
 BASE=${1:-https://my-site-preview.example.workers.dev}
 sed "s#^/#$BASE/#" scripts/fit-urls.txt > /tmp/fit-urls.txt
-npx --yes github:Beo-Halfhand/fit-check#v0.1.2 --quiet --urls-file /tmp/fit-urls.txt --out fit-report || { echo "fit-check failed: see fit-report/report.md"; exit 1; }
+npx --yes github:Beo-Halfhand/fit-check#v0.1.3 --quiet --urls-file /tmp/fit-urls.txt --out fit-report || { echo "fit-check failed: see fit-report/report.md"; exit 1; }
 ```
 
 3. Or as an npm script:
 
 ```json
 "scripts": { "fit": "fit-check --urls-file scripts/fit-urls.txt" },
-"devDependencies": { "fit-check": "github:Beo-Halfhand/fit-check#v0.1.2" }
+"devDependencies": { "fit-check": "github:Beo-Halfhand/fit-check#v0.1.3" }
 ```
 
 4. In CI (GitHub Actions):
 
 ```yaml
 - run: npx playwright install --with-deps chromium-headless-shell
-- run: npx --yes github:Beo-Halfhand/fit-check#v0.1.2 --quiet --urls-file scripts/fit-urls.txt
+- run: npx --yes github:Beo-Halfhand/fit-check#v0.1.3 --quiet --urls-file scripts/fit-urls.txt
 - if: failure()
   uses: actions/upload-artifact@v4
   with: { name: fit-report, path: fit-report }
