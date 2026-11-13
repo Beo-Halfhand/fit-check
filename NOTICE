@@ -1,0 +1,7 @@
+fit-check
+Copyright 2026 Beo Halfhand
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+fit-check drives a browser through playwright-core (Apache-2.0, Microsoft),
+installed from npm as a dependency and not copied into this repository.

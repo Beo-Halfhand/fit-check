@@ -1,0 +1,27 @@
+{
+  "name": "fit-check",
+  "version": "0.1.1",
+  "description": "Fit-and-finish checker: renders pages at nine widths and flags words split mid-word, text that overflows or is clipped, and sideways page scroll.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "fit-check": "bin/fit-check.mjs"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "playwright-core": "1.64.1"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "test": "node test/run.mjs"
+  }
+}

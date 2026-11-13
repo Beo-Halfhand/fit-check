@@ -1,0 +1,16 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>fit-check fixture: one of each bug</title>
+<style>body{font:16px/1.4 system-ui,sans-serif;margin:0;padding:16px}.tile{width:70px;border:1px solid #888;padding:4px;overflow-wrap:anywhere}.tight{width:90px;border:1px solid #888;white-space:nowrap}.clip{width:90px;border:1px solid #888;white-space:nowrap;overflow:hidden}.wide{width:2000px;height:10px;background:#ccc}
+.ok-ellipsis{width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ok-scroll{width:90px;overflow-x:auto;white-space:nowrap}.ok-hash{width:90px;word-break:break-all}</style></head>
+<body>
+<div class="tile" id="split">Gingersnap</div>
+<div class="tight" id="overflow">Moonlight Trading Post</div>
+<div class="clip" id="clipped">Moonlight Trading Post</div>
+<div class="ok-ellipsis">Moonlight Trading Post</div>
+<div class="ok-scroll">Moonlight Trading Post</div>
+<div class="ok-hash">36e92ffdda167056f97f95a14f97e20ff55c9f1942598e75a64a584b17f2b088</div>
+<div class="tile" data-fit-allow="break">Supercalifragilistic</div>
+<p>pick-the-winner card, a real break opportunity after a hyphen</p>
+<div class="wide" id="wide"></div>
+<script>setTimeout(function () { undefinedFunctionOnPurpose(); }, 10);</script>
+</body></html>
