@@ -5,7 +5,7 @@
 //   clipped      text cut off by its box or an ancestor with overflow hidden (no ellipsis, no line clamp)
 //   page-scroll  the page is wider than the viewport (sideways scroll)
 //   page-error   an uncaught JavaScript error while the page loaded (it can leave half a page drawn)
-// Writes <out>/report.md, <out>/report.json and a screenshot crop per hit in <out>/crops/. Exit 0 clean, 1 hits, 2 a page failed.
+// Writes <out>/report.md, <out>/report.json and a screenshot crop per hit in <out>/crops/. Exit 0 clean, 1 hits, 2 a page failed or no browser.
 // No secrets, no network beyond the URLs you give it.
 import fs from 'node:fs';
 import os from 'node:os';
@@ -121,7 +121,15 @@ async function checkOne(browser, url, width) {
   return res;
 }
 
-const browser = await chromium.launch({ executablePath: findChromium() });
+let browser;
+try { browser = await chromium.launch({ executablePath: findChromium() }); }
+catch (e) {
+  // exit 2, not 1: 1 means "the pages have hits", and a missing browser must not read as that in CI
+  console.error('fit-check: could not start a Chromium (' + String(e.message || e).split('\n')[0].slice(0, 200) + ')');
+  console.error('Install one with:  npx playwright install chromium-headless-shell');
+  console.error('or point fit-check at a browser with --chromium <path> or FIT_CHECK_CHROMIUM.');
+  process.exit(2);
+}
 fs.mkdirSync(path.join(out, 'crops'), { recursive: true });
 const jobs = []; for (const u of urls) for (const w of widths) jobs.push([u, w]);
 const results = []; let next = 0, done = 0;

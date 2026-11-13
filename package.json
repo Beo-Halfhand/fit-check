@@ -1,6 +1,6 @@
 {
   "name": "fit-check",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Fit-and-finish checker: renders pages at nine widths and flags words split mid-word, text that overflows or is clipped, and sideways page scroll.",
   "type": "module",
   "private": true,

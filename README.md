@@ -10,7 +10,7 @@ A fit-and-finish checker for web pages. Give it URLs; it renders each one at nin
 | `page-scroll` | The page is wider than the screen, so it scrolls sideways. The report names the elements sticking out. |
 | `page-error` | An uncaught JavaScript error while the page loaded (it can leave half a page drawn). |
 
-It writes `fit-report/report.md` (grouped by page, then by hit, with the widths each one shows at), `fit-report/report.json` and a screenshot crop of every hit in `fit-report/crops/`. **Exit code:** 0 clean, 1 hits, 2 a page failed to load.
+It writes `fit-report/report.md` (grouped by page, then by hit, with the widths each one shows at), `fit-report/report.json` and a screenshot crop of every hit in `fit-report/crops/`. **Exit code:** 0 clean, 1 hits, 2 a page failed to load or no browser could start.
 
 It opens every `<details>` and clicks through every visible `[role="tab"]`, so content in closed folds and other tabs is checked too. It needs no keys or secrets and talks only to the URLs you give it.
 
@@ -36,8 +36,8 @@ npx playwright install chromium-headless-shell    # or set FIT_CHECK_CHROMIUM=/p
 Run it straight from GitHub. Pin a tag so a later change can't surprise you:
 
 ```sh
-npx --yes github:Beo-Halfhand/fit-check#v0.1.1 https://example.com/ https://example.com/about
-npx --yes github:Beo-Halfhand/fit-check#v0.1.1 --urls-file fit-urls.txt --out fit-report
+npx --yes github:Beo-Halfhand/fit-check#v0.1.2 https://example.com/ https://example.com/about
+npx --yes github:Beo-Halfhand/fit-check#v0.1.2 --urls-file fit-urls.txt --out fit-report
 ```
 
 Or from a clone:
@@ -71,21 +71,21 @@ Options:
 # scripts/fit-check.sh
 BASE=${1:-https://my-site-preview.example.workers.dev}
 sed "s#^/#$BASE/#" scripts/fit-urls.txt > /tmp/fit-urls.txt
-npx --yes github:Beo-Halfhand/fit-check#v0.1.1 --quiet --urls-file /tmp/fit-urls.txt --out fit-report || { echo "fit-check failed: see fit-report/report.md"; exit 1; }
+npx --yes github:Beo-Halfhand/fit-check#v0.1.2 --quiet --urls-file /tmp/fit-urls.txt --out fit-report || { echo "fit-check failed: see fit-report/report.md"; exit 1; }
 ```
 
 3. Or as an npm script:
 
 ```json
 "scripts": { "fit": "fit-check --urls-file scripts/fit-urls.txt" },
-"devDependencies": { "fit-check": "github:Beo-Halfhand/fit-check#v0.1.1" }
+"devDependencies": { "fit-check": "github:Beo-Halfhand/fit-check#v0.1.2" }
 ```
 
 4. In CI (GitHub Actions):
 
 ```yaml
 - run: npx playwright install --with-deps chromium-headless-shell
-- run: npx --yes github:Beo-Halfhand/fit-check#v0.1.1 --quiet --urls-file scripts/fit-urls.txt
+- run: npx --yes github:Beo-Halfhand/fit-check#v0.1.2 --quiet --urls-file scripts/fit-urls.txt
 - if: failure()
   uses: actions/upload-artifact@v4
   with: { name: fit-report, path: fit-report }
